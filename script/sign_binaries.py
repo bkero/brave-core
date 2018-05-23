@@ -22,7 +22,7 @@ def run_cmd(cmd):
   for line in p.stdout:
     print line
   p.wait()
-  assert(p.returncode == 0, "Error signing")
+  assert p.returncode == 0, "Error signing"
 
 def sign_binaries(base_dir):
   matches = []
