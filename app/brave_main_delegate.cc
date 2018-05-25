@@ -14,6 +14,7 @@
 #include "brave/utility/brave_content_utility_client.h"
 #include "chrome/common/chrome_paths.h"
 #include "chrome/common/chrome_paths_internal.h"
+#include "public/platform/WebRuntimeFeatures.h"
 
 #if !defined(CHROME_MULTIPLE_DLL_BROWSER)
 base::LazyInstance<BraveContentRendererClient>::DestructorAtExit
@@ -67,6 +68,10 @@ bool BraveMainDelegate::ShouldEnableProfilerRecording() {
 
 void BraveMainDelegate::PreSandboxStartup() {
   ChromeMainDelegate::PreSandboxStartup();
+
+  blink::WebRuntimeFeatures::EnableWebUsb(false);
+  blink::WebRuntimeFeatures::EnableWebBluetooth(false);
+
 #if defined(OS_POSIX)
   // Setup NativeMessagingHosts to point to the default Chrome locations
   // because that's where native apps will create them
