@@ -6,28 +6,27 @@
 
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
+#include "content/public/browser/browser_thread.h"
 
 namespace brave_shields {
 
-bool GetDATFileData(const base::FilePath& file_path,
-    std::vector<unsigned char>& buffer) {
+void GetDATFileData(const base::FilePath& file_path,
+                    DATFileDataBuffer* buffer) {
   int64_t size = 0;
-  if (!base::PathExists(file_path)
-      || !base::GetFileSize(file_path, &size)
-      || 0 == size) {
+  if (!base::PathExists(file_path) ||
+      !base::GetFileSize(file_path, &size) ||
+      0 == size) {
     LOG(ERROR) << "GetDATFileData: "
-      << "the dat file is not found or corrupted "
-      << file_path;
-    return false;
-  }
-  buffer.resize(size);
-  if (size != base::ReadFile(file_path, (char*)&buffer.front(), size)) {
-    LOG(ERROR) << "GetDATFileData: cannot "
-      << "read dat file " << file_path;
-     return false;
+               << "the dat file is not found or corrupted "
+               << file_path;
+    return;
   }
 
-  return true;
+  buffer->resize(size);
+  if (size != base::ReadFile(file_path, (char*)&buffer->front(), size)) {
+    LOG(ERROR) << "GetDATFileData: cannot "
+               << "read dat file " << file_path;
+  } 
 }
 
 }  // namespace brave_shields

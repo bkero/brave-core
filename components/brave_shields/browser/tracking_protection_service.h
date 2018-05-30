@@ -7,14 +7,15 @@
 
 #include <stdint.h>
 
-#include <memory>
-#include <string>
 #include <map>
-#include <vector>
+#include <memory>
 #include <mutex>
+#include <string>
+#include <vector>
 
 #include "base/files/file_path.h"
 #include "brave/components/brave_shields/browser/base_brave_shields_service.h"
+#include "brave/components/brave_shields/browser/dat_file_util.h"
 #include "content/public/common/resource_type.h"
 
 class CTPParser;
@@ -58,9 +59,11 @@ class TrackingProtectionService : public BaseBraveShieldsService {
       const std::string& component_id,
       const std::string& component_base64_public_key);
 
+  void OnDATFileDataReady();
   std::vector<std::string> GetThirdPartyHosts(const std::string& base_host);
 
-  std::vector<unsigned char> buffer_;
+  brave_shields::DATFileDataBuffer buffer_;
+
   std::unique_ptr<CTPParser> tracking_protection_client_;
   // TODO: Temporary hack which matches both browser-laptop and Android code
   std::vector<std::string> white_list_;

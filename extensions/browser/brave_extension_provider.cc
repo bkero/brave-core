@@ -123,6 +123,8 @@ bool BraveExtensionProvider::MustRemainDisabled(
     const Extension* extension,
     disable_reason::DisableReason* reason,
     base::string16* error) const {
+  if (reason)
+    *reason = disable_reason::DISABLE_BLOCKED_BY_POLICY;
   return extension->id() == brave_extension_id;
 }
 

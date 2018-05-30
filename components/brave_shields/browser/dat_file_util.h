@@ -5,19 +5,20 @@
 #ifndef BRAVE_COMPONENTS_BRAVE_SHIELDS_BROWSER_DAT_FILE_UTIL_
 #define BRAVE_COMPONENTS_BRAVE_SHIELDS_BROWSER_DAT_FILE_UTIL_
 
-#include <stdint.h>
-
-#include <memory>
-#include <string>
 #include <vector>
-#include <mutex>
 
-#include "base/files/file_path.h"
+#include "base/callback_forward.h"
+
+namespace base {
+class FilePath;
+}
 
 namespace brave_shields {
 
-bool GetDATFileData(const base::FilePath& file_path,
-    std::vector<unsigned char>& buffer);
+using DATFileDataBuffer = std::vector<unsigned char>;
+
+void GetDATFileData(const base::FilePath& file_path,
+                    DATFileDataBuffer* buffer);
 
 }  // namespace brave_shields
 

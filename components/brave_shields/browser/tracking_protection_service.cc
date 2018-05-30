@@ -5,16 +5,14 @@
 #include "brave/components/brave_shields/browser/tracking_protection_service.h"
 
 #include <algorithm>
-#include <string>
 #include <utility>
-#include <map>
-#include <vector>
 
 #include "base/base_paths.h"
 #include "base/logging.h"
 #include "base/macros.h"
 #include "base/memory/ptr_util.h"
 #include "base/strings/utf_string_conversions.h"
+#include "base/task_scheduler/post_task.h"
 #include "base/threading/thread_restrictions.h"
 #include "brave/components/brave_shields/browser/dat_file_util.h"
 #include "brave/vendor/tracking-protection/TPParser.h"
@@ -93,23 +91,32 @@ bool TrackingProtectionService::Init() {
   return true;
 }
 
-void TrackingProtectionService::OnComponentReady(const std::string& component_id,
-                                                 const base::FilePath& install_dir) {
-  base::FilePath dat_file_path = install_dir.AppendASCII(DAT_FILE);
-  if (!GetDATFileData(dat_file_path, buffer_)) {
-    LOG(ERROR) << "Could not obtain tracking protection data file";
-    return;
-  }
+void TrackingProtectionService::OnDATFileDataReady() {
   if (buffer_.empty()) {
     LOG(ERROR) << "Could not obtain tracking protection data";
     return;
   }
+
   tracking_protection_client_.reset(new CTPParser());
+
   if (!tracking_protection_client_->deserialize((char*)&buffer_.front())) {
     tracking_protection_client_.reset();
     LOG(ERROR) << "Failed to deserialize tracking protection data";
-    return;
   }
+}
+
+void TrackingProtectionService::OnComponentReady(
+    const std::string& component_id,
+    const base::FilePath& install_dir) {
+  base::FilePath dat_file_path = install_dir.AppendASCII(DAT_FILE);
+
+  base::PostTaskWithTraitsAndReply(
+      FROM_HERE,
+      {base::TaskPriority::BACKGROUND, base::MayBlock(),
+       base::TaskShutdownBehavior::SKIP_ON_SHUTDOWN},
+      base::BindOnce(&GetDATFileData, dat_file_path, &buffer_),
+      base::Bind(&TrackingProtectionService::OnDATFileDataReady,
+                 base::Unretained(this)));
 }
 
 // Ported from Android: net/blockers/blockers_worker.cc
