@@ -13,12 +13,12 @@
 namespace brave {
 
 bool IsUpdaterURL(const GURL& gurl) {
-  static std::vector<URLPattern> updater_patterns({
+  static std::vector<URLPattern> updater_patterns/*({
       URLPattern(URLPattern::SCHEME_HTTPS, std::string(component_updater::kUpdaterDefaultUrl) + "*"),
       URLPattern(URLPattern::SCHEME_HTTP, std::string(component_updater::kUpdaterFallbackUrl) + "*"),
       URLPattern(URLPattern::SCHEME_HTTPS, std::string(component_updater::kUpdaterDefaultUrlAlt) + "*"),
       URLPattern(URLPattern::SCHEME_HTTP, std::string(component_updater::kUpdaterFallbackUrlAlt) + "*"),
-  });
+  })*/;
   return std::any_of(updater_patterns.begin(), updater_patterns.end(),
       [&gurl](URLPattern pattern){
         return pattern.MatchesURL(gurl);
@@ -48,6 +48,7 @@ int OnBeforeURLRequest_StaticRedirectWork(
   if (IsUpdaterURL(request->url())) {
     replacements.SetQueryStr(request->url().query_piece());
     *new_url = GURL(kBraveUpdatesExtensionsEndpoint).ReplaceComponents(replacements);
+    LOG(ERROR) << "New urL: " << *new_url;
     return net::OK;
   }
   return net::OK;
